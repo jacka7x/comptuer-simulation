@@ -211,6 +211,10 @@ class ArithmeticLogicUnit {
         return REGISTER_B.register;
     }
 
+    writeBus(output) {
+        BUS.write(output);
+    }
+
     // deals with calculations and sends to bus
     // adds A and B registers
     calculate(reg_A, reg_B, sub){
@@ -286,37 +290,27 @@ class ArithmeticLogicUnit {
         }
     }
 
-    // negate(reg_B) {
-
-    //     console.log("hi");
-    //     return reg_B.map(element => {
-    //         if (element === 1) {
-    //             element = 0;
-    //         } else {
-    //             element = 1;
-    //         }
-    //     });
-    // }
-
-    writeBus(output) {
-        BUS.write(output);
+    // flips all bits to make negitive number
+    // +1 added to carry in calculate fuction
+    negate() {
+        let neg_B = this.readRegister_B().map(element => {
+            if (element === 1) {
+                return 0;
+            } else {
+                return 1;
+            }
+        });
+        return neg_B
     }
 
     // calculates every clock tick, writes to bus if sumOutEnableState is HIGH
-    // flips reg_B if subtractEnableState is HIGH
+    // negates reg_B if subtractEnableState is HIGH
     clock(){
         let reg_B;
         
         if (this.subtractEnableState === HIGH) {
-            reg_B = this.readRegister_B().map(element => {
-                if (element === 1) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            });
+            reg_B = this.negate();
         } else {
-            
             reg_B = this.readRegister_B();
         }
 
@@ -374,8 +368,8 @@ console.log(`Started sucessfully. Clock speed is ${CLOCK.getClockSpeed()}.\n`);
 
 //TEST AREA --- TESTS SET IN CLOCK TICK FUNCTION
 
-const A_test = [0, 0, 1, 1, 1, 1, 1, 1];
-const B_test = [0, 1, 0, 0, 0, 0, 0, 0];
+const A_test = [0, 0, 0, 0, 1, 0, 0, 0];
+const B_test = [0, 0, 0, 0, 0, 0, 0, 1];
 
 REGISTER_A.set(A_test);
 REGISTER_B.set(B_test);
