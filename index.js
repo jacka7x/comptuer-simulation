@@ -11,7 +11,7 @@
 // ***** TODO *****
 // CREATE WEBSITE GUI
 // create modules with load/enable to from bus
-// create clear method to reset comuter without turning on/off??
+// create clear method to reset computer without turning on/off??
 
 // CLOCK
 // 2) each module has tick function, clock calls all tick fuctions on HIGH, control only sets load/enable for next tick (I prefer this)
@@ -59,6 +59,11 @@ class Clock {
             if (i === 4) {
                 console.log("Test 4");
                 test_4()
+            }
+
+            if (i === 6) {
+                console.log("Test 6");
+                test_6()
             }
 
             if (i === 8) {
@@ -111,9 +116,15 @@ class Register {
         this.enableState = LOW;
     }
 
+    // get and set for testing purposes only
     get(){
         return this.register;
     }
+
+    set(setValue){
+        this.register = setValue;
+    }
+    // -------------------------------------
 
     load() {
         this.register = BUS.read();
@@ -138,7 +149,186 @@ class Register {
     }
 }
 
+class InstructionRegister {
+
+    // registar storage and load/enable states
+    constructor() {
+        // FIRST FOUR BITS TO BUS / LAST FOUR BITS TO INSTRUCTION DECODER
+        this.register = [LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW];
+
+        // MAYBE SEPERATE STATES FOR BUS/INSTRUCTION DECODER
+        this.loadState = LOW;
+        this.enableState = LOW;
+    }
+
+    get(){
+        return this.register;
+    }
+
+    load() {
+        // CHANGE TO LOAD ONLY FIRST FOUR BITS
+        this.register = BUS.read();
+    }
+
+    enable() {
+        // CHANGE TO ENABLE ONLY FIRT FOUR BITS
+        BUS.write(this.register);
+    }
+
+    // calls load() or enable() methods at end of each HIGH clock tick if set to HIGH
+    // CHANGE TO ONLY LOAD/ENABLE FIRST FOUR BITS TO BUS
+    clock(){
+        if (this.loadState === HIGH && this.enableState === HIGH) {
+            console.log(`${this} error: both load and enable are HIGH`);
+        } else {
+            if (this.loadState === HIGH) {
+                this.load();
+            }
+            if (this.enableState === HIGH) {
+                this.enable();
+            }
+        }
+    }
+}
+
 // ----- REGISTER -----
+
+// ----- ALU ------
+
+class ArithmeticLogicUnit {
+
+    //
+    constructor(){
+        this.subtractEnableState = LOW;
+        this.sumOutEnableState = LOW;
+    }
+
+    readRegister_A() {
+        return REGISTER_A.register;
+    }
+
+    readRegister_B() {
+        return REGISTER_B.register;
+    }
+
+    // deals with calculations and sends to bus
+    // adds A and B registers
+    calculate(reg_A, reg_B, sub){
+
+        // for 8 bit computer
+        let bitSize = 8;
+        
+        let result = [];
+        let carry;
+
+        // twos compiment need to +1 on
+        if (sub === HIGH){
+            carry = 1;
+        } else {
+            carry = 0;
+        }
+        
+
+        // catch array size error
+        if (reg_A.length != 8 || reg_B.length != 8 ) {
+            console.log("ALU error: input array not consistant with computer bitSize")
+        }
+
+        // > 0 becuase last bit is sign bit
+        for (let i = bitSize - 1; i >= 0; i--) {
+
+            let evalArray = this.evaluateBit(reg_A[i], reg_B[i], carry);
+            carry = evalArray[0];
+            result.unshift(evalArray[1]);
+
+        }
+        return result;
+    }
+
+    // LOGIC FUNCTION
+    evaluateBit(A_bit, B_bit, carry) {
+
+        // change to string becuase switch case donsen't take arrays
+        let input = [A_bit, B_bit].toString();
+
+        // evaulates 1 bit from A and B
+        // [CARRY, VALUE]
+        if (carry === 0) {
+            switch (input) {
+                case "0,0":
+                    return [0, 0]
+                break;
+                case "0,1":
+                    return [0, 1]
+                break;
+                case "1,0":
+                    return [0, 1]
+                break;
+                case "1,1":
+                    return [1, 0]
+                break;
+            }
+        } else {
+            switch (input) {
+                case "0,0":
+                    return [0, 1]
+                break;
+                case "0,1":
+                    return [1, 0]
+                break;
+                case "1,0":
+                    return [1, 0]
+                break;
+                case "1,1":
+                    return [1, 1]
+                break;
+            }
+        }
+    }
+
+    // negate(reg_B) {
+
+    //     console.log("hi");
+    //     return reg_B.map(element => {
+    //         if (element === 1) {
+    //             element = 0;
+    //         } else {
+    //             element = 1;
+    //         }
+    //     });
+    // }
+
+    writeBus(output) {
+        BUS.write(output);
+    }
+
+    // calculates every clock tick, writes to bus if sumOutEnableState is HIGH
+    // flips reg_B if subtractEnableState is HIGH
+    clock(){
+        let reg_B;
+        
+        if (this.subtractEnableState === HIGH) {
+            reg_B = this.readRegister_B().map(element => {
+                if (element === 1) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            });
+        } else {
+            
+            reg_B = this.readRegister_B();
+        }
+
+        let output = this.calculate(this.readRegister_A(), reg_B, this.subtractEnableState)
+
+        if (this.sumOutEnableState === HIGH) {
+            this.writeBus(output);
+        }
+    }
+}
+
+// ----- ALU ------
 
 // ----- CONTROL -----
 
@@ -146,20 +336,29 @@ class Control {
     // fill out later, change name?
 }
 
+// put in control class later, currently global fuctions (used in clock class)
+// PUT IN ARRAY
+// DOES ORDER MATTER???
+function  moduleClocks(){
+    REGISTER_A.clock();
+    REGISTER_B.clock();
+    ALU.clock();
+}
+
+
 
 console.log("Booting up...");
 
 // create instance of bus
 const BUS = new Bus();
 
-// create instance of register (1, 2 or A B?)
-const REGISTER_1 = new Register();
-const REGISTER_2 = new Register();
+// create instance of register A, B, INSTRUCTION
+const REGISTER_A = new Register();
+const REGISTER_B = new Register();
+const REGISTER_INSTRUCTION = new InstructionRegister();
 
-// put in control class later, currently global fuctions (used in clock class)
-function  moduleClocks(){
-    REGISTER_1.clock();
-}
+// create instance of ALU
+const ALU = new ArithmeticLogicUnit();
 
 //...
 // create instance of clock and start the clock at 'clockSpeed'
@@ -169,24 +368,31 @@ CLOCK.start()
 console.log(`Started sucessfully. Clock speed is ${CLOCK.getClockSpeed()}.\n`);
 
 
+
+
 // ----- CONTROL -----  
 
 //TEST AREA --- TESTS SET IN CLOCK TICK FUNCTION
 
-console.log("BUS: " + BUS.get());
-console.log("REGISTER_1: " + REGISTER_1.get());
-BUS.write([[1,1,1,1,1,1,1,1]])
+const A_test = [0, 0, 1, 1, 1, 1, 1, 1];
+const B_test = [0, 1, 0, 0, 0, 0, 0, 0];
 
-REGISTER_1.loadState = HIGH;
+REGISTER_A.set(A_test);
+REGISTER_B.set(B_test);
+ALU.subtractEnableState = HIGH;
 
 function test_4() {
+    console.log("REGISTER_A: " + ALU.readRegister_A());
+    console.log("REGISTER_B: " + ALU.readRegister_B());
+    ALU.sumOutEnableState = HIGH;
+}
+
+function test_6() {
     console.log("BUS: " + BUS.get());
-    console.log("REGISTER_1: " + REGISTER_1.get());
 }
 
 function test_8() {
-    console.log("BUS: " + BUS.get());
-    console.log("REGISTER_1: " + REGISTER_1.get());
+
 }
 
 
