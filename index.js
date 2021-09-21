@@ -37,15 +37,36 @@ class Clock {
     }
 
     start() {
+        // for testing --------------------|>
+        let i = 0;
+
         // function occurs every 'clockspeed' milliseconds, alternates HIGH/LOW
+        // each clock tick calls clock fuction in each module
         setInterval( () => {
             if (this.clockState === LOW) {
                 this.clockState = HIGH;
-                REGISTER_1.clock();
+
+                // put in control class later, currently global function
+                moduleClocks();
             } else {
                 this.clockState = LOW;
             }
-            console.log(this.clockState);     
+
+            // for testing --------------------|>
+            // console.log(this.clockState);
+            i++;
+
+            if (i === 4) {
+                console.log("Test 4");
+                test_4()
+            }
+
+            if (i === 8) {
+                console.log("Test 8");
+                test_8()
+            }
+            // for testing --------------------|>
+
         }, this.clockSpeed);
     }
 }
@@ -66,6 +87,7 @@ class Bus {
         return this.bus;
     }
 
+    // modules call to read and write to/from bus
     read() {
         return this.bus;
     }
@@ -82,11 +104,11 @@ class Bus {
 
 class Register {
 
-    // registar storage
+    // registar storage and load/enable states
     constructor() {
         this.register = [LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW];
-        this.loadA = LOW;
-        this.enableA = LOW;
+        this.loadState = LOW;
+        this.enableState = LOW;
     }
 
     get(){
@@ -101,24 +123,29 @@ class Register {
         BUS.write(this.register);
     }
 
+    // calls load() or enable() methods at end of each HIGH clock tick if set to HIGH
     clock(){
-        console.log("meme");
-        if (this.loadA = HIGH) {
-            this.load();
-            console.log("loaded");
-        }
-        if (this.enableA = HIGH) {
-            this.enable();
-            console.log("enabled");
+        if (this.loadState === HIGH && this.enableState === HIGH) {
+            console.log(`${this} error: both load and enable are HIGH`);
+        } else {
+            if (this.loadState === HIGH) {
+                this.load();
+            }
+            if (this.enableState === HIGH) {
+                this.enable();
+            }
         }
     }
-
 }
 
-// from clock -----> clock.tick()??? call register.tick()...????
 // ----- REGISTER -----
 
-// ---------------------------------------------------------------------
+// ----- CONTROL -----
+
+class Control {
+    // fill out later, change name?
+}
+
 
 console.log("Booting up...");
 
@@ -129,6 +156,11 @@ const BUS = new Bus();
 const REGISTER_1 = new Register();
 const REGISTER_2 = new Register();
 
+// put in control class later, currently global fuctions (used in clock class)
+function  moduleClocks(){
+    REGISTER_1.clock();
+}
+
 //...
 // create instance of clock and start the clock at 'clockSpeed'
 const CLOCK = new Clock(500);
@@ -137,12 +169,25 @@ CLOCK.start()
 console.log(`Started sucessfully. Clock speed is ${CLOCK.getClockSpeed()}.\n`);
 
 
-//TEST AREA
-console.log("BUS: " + BUS.get());
-console.log("REGISTER_1: " + REGISTER_1.get());
+// ----- CONTROL -----  
 
-BUS.write([0,1,1,0,1,1,0,0]);
-REGISTER_1.load();
+//TEST AREA --- TESTS SET IN CLOCK TICK FUNCTION
 
 console.log("BUS: " + BUS.get());
 console.log("REGISTER_1: " + REGISTER_1.get());
+BUS.write([[1,1,1,1,1,1,1,1]])
+
+REGISTER_1.loadState = HIGH;
+
+function test_4() {
+    console.log("BUS: " + BUS.get());
+    console.log("REGISTER_1: " + REGISTER_1.get());
+}
+
+function test_8() {
+    console.log("BUS: " + BUS.get());
+    console.log("REGISTER_1: " + REGISTER_1.get());
+}
+
+
+
