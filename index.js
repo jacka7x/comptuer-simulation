@@ -13,6 +13,10 @@
 // create modules with load/enable to from bus
 // create clear method to reset computer without turning on/off??
 
+//////////////////////////////!!!!!!!!!!!!!!!!!!!!!!!
+//make bus read / write seperate (2 functions per clock tick)
+//PUT CONSOLE LOG ON EVERYTHING (with clobal if statement to toggle)
+
 // CLOCK
 // 2) each module has tick function, clock calls all tick fuctions on HIGH, control only sets load/enable for next tick (I prefer this)
 // Put all clock connected modules in arry, loop over and activate each high tick
@@ -88,6 +92,8 @@ class Bus {
         this.bus = [LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW];
     }
 
+
+    // why dup???
     get(){
         return this.bus;
     }
@@ -220,12 +226,13 @@ class ArithmeticLogicUnit {
     calculate(reg_A, reg_B, sub){
 
         // for 8 bit computer
+        // MAKE THIS A GLOBAL
         let bitSize = 8;
         
         let result = [];
         let carry;
 
-        // twos compiment need to +1 on
+        // twos compliment need to +1 on
         if (sub === HIGH){
             carry = 1;
         } else {
@@ -234,7 +241,7 @@ class ArithmeticLogicUnit {
         
 
         // catch array size error
-        if (reg_A.length != 8 || reg_B.length != 8 ) {
+        if (reg_A.length != bitSize || reg_B.length != bitSize ) {
             console.log("ALU error: input array not consistant with computer bitSize")
         }
 
