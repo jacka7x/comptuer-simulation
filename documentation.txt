@@ -1,0 +1,3 @@
+CLOCK:
+    -HIGH and LOW clock cycles
+    -Computer components first enable, then load to ensure proper exchange of information.
