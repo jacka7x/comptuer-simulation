@@ -1,3 +1,19 @@
+TODO:
+    -Make website GUI for testing.
+    -Find out what the proper way to do inheritance without classes is. Can I do with module pattern?
+    -Can I use the same clock/read/write functions for every module?
+
+GENERAL:
+    -Make sure order of load/enable does not cause any problems.
+    -Make sure same size array is always passed between modules.
+
 CLOCK:
     -HIGH and LOW clock cycles
     -Computer components first enable, then load to ensure proper exchange of information.
+
+BUS:
+    -Simple array holding and transfering data. Modules can read and write from bus on each clock tick.
+    -Bus imput must be bitsize of computer.
+
+REGISTER A B INSTRUCTION
+    ttern?

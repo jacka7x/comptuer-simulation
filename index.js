@@ -265,36 +265,37 @@ class ArithmeticLogicUnit {
         // evaulates 1 bit from A and B
         // [CARRY, VALUE]
         if (carry === 0) {
-            switch (input) {
+            switch (input) {// USE BITWISE OPERATORS
                 case "0,0":
                     return [0, 0]
-                break;
+                break;// USE BITWISE OPERATORS
                 case "0,1":
                     return [0, 1]
-                break;
+                break;// USE BITWISE OPERATORS// USE BITWISE OPERATORS
                 case "1,0":
-                    return [0, 1]
+                    return [0, 1]// USE BITWISE OPERATORS
                 break;
-                case "1,1":
+                case "1,1":// USE BITWISE OPERATORS
                     return [1, 0]
-                break;
+                break;// USE BITWISE OPERATORS
             }
-        } else {
+        } else {// USE BITWISE OPERATORS
             switch (input) {
                 case "0,0":
-                    return [0, 1]
+                    return [0, 1]// USE BITWISE OPERAT// USE BITWISE OPERATORSORS
                 break;
-                case "0,1":
-                    return [1, 0]
-                break;
+                case "0,1":// USE BITWISE OPERATORS
+                    return [1, 0]// USE BITWISE OPERATORS
+                    // USE BITWISE OPERATORS
+                break;// USE BITWISE OPERATORS// USE BITWISE OPERATORS
                 case "1,0":
                     return [1, 0]
                 break;
                 case "1,1":
-                    return [1, 1]
+                    return [1, 1]// USE BITWISE OPERATORS
                 break;
             }
-        }
+        }// USE BITWISE OPERATORS
     }
 
     // flips all bits to make negitive number
