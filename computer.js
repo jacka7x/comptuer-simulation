@@ -3,23 +3,78 @@
 const HIGH = 1
 const LOW = 0;
 const BIT_SIZE = 8;
-const clockSpeedDefault = 500;
+
+const DOM = ( () => {
+    const clockOutput = Array.from(Array.from(document.getElementById("CLOCK").getElementsByClassName("module-output"))[0].getElementsByClassName("bit-LED"));
+
+    const busOutput = Array.from(Array.from(document.getElementById("BUS").getElementsByClassName("module-output"))[0].getElementsByClassName("bit-LED"));
+
+    function output() {
+        // DOM.output called three times per clock cycle, from the clock
+
+        clockDisplay();
+        busDisplay();
+    }
+
+    function clockDisplay() {
+        CLOCK.getState() ?
+            clockOutput[0].classList.add("onLED") :
+            clockOutput[0].classList.remove("onLED");
+    }
+
+    function busDisplay() {
+        BUS.getData().forEach( (data, LED) => {
+            data ?
+                busOutput[LED].classList.add("onLED") :
+                busOutput[LED].classList.remove("onLED");
+        });
+    }
+
+    return{
+        output
+    }
+
+})();
+
+const INPUT = ( () => {
+    function toBus(input) {
+        if(input.length !== BIT_SIZE) {
+            console.error("Input to bus wrong bit size.")
+        } else {
+            BUS.write(input);
+        }
+    }
+
+    return {
+        toBus
+    }
+})();
 
 const CLOCK = ( () => {
+    let state = LOW;
+    const clockSpeedDefault = 500;
 
     function startClock(interval = clockSpeedDefault) {
         setInterval( () => {
-            pulse();
+
+            // if HIGH go LOW and vice versa
+            state ? pulseLOW() : pulseHIGH();
         }, interval)
 
         console.log(`CLOCK STARTING AT ${interval} MS`);
     }
 
-    function pulse() {
-        // console.log("SINGLE CLOCK PULSE")
-
+    function pulseHIGH() {
+        state = HIGH;
+        DOM.output()
         moduleEnableTick();
+        DOM.output();
         moduleLoadTick();
+    }
+
+    function pulseLOW() {
+        state = LOW;
+        DOM.output()
     }
     
     function moduleEnableTick() {
@@ -36,8 +91,13 @@ const CLOCK = ( () => {
         REGISTER_B.clockPulse("load")
     }
 
+    function getState() {
+        return state;
+    }
+
     return {
-        startClock
+        startClock,
+        getState
     }
 })();
 
@@ -56,9 +116,14 @@ const BUS = ( () => {
         }
     }
 
+    function getData() {
+        return data
+    }
+
     return {
         read,
-        write
+        write,
+        getData
     }
 })();
 
@@ -83,6 +148,15 @@ const REGISTER_A = ( () => {
             if (enable && enableOrLoad === "enable") { write(); }
         }
     }
+
+    function getData(){
+        return data;
+    }
+
+    return {
+        clockPulse,
+        getData
+    }
 })();
 
 const REGISTER_B = ( () => {
@@ -106,8 +180,28 @@ const REGISTER_B = ( () => {
             if (enable && enableOrLoad === "enable") { write(); }
         }
     }
+
+    function getData(){
+        return data;
+    }
+
+    return {
+        clockPulse,
+        getData
+    }
 })();
 
 // ------------------------------- ||
 
-CLOCK.startClock(2000);
+function rand() {
+    return Math.random() < 0.5
+}
+
+CLOCK.startClock();
+
+setInterval( () => {
+    INPUT.toBus(
+        [rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand()])
+}, 1200)
+
+

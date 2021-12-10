@@ -1,0 +1,84 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+
+body{
+    background-color: #202020;
+}
+
+main{
+    margin: 2vh 2vh 2vh 2vh;
+    height: 80vh;
+    width: auto;
+
+}
+
+#computer{
+    padding-top: 5vh;
+    width: 100%;
+    height: 100%;
+    border-radius: 0.3rem;
+    background-color: #cccccc;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.module{
+    padding: 1rem;
+    margin-bottom: 2vh;
+    width: 70vw;
+    height: 7rem;
+    border-radius: 0.3rem;
+    background-color: #202020;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.module-title{
+    text-align: left;
+    color: red;
+    font-family: Helvetica;
+    font-size: 1rem;
+}
+
+.module-IO{
+    margin: 0.3rem, auto 3rem auto;
+    width: 80%;
+    flex: 1;
+    background-color: white;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.module-output{
+    background-color: #cccccc;
+    flex: 2;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.module-input{
+    flex: 1;
+}
+
+.bit-LED{
+    margin: 0 0.7rem;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 9999rem;
+    background-color: rgb(0, 0, 105);
+}
+
+.onLED{
+    background-color: rgb(64, 180, 247);
+    box-shadow: 0 0 0.6rem 0.1rem rgb(74, 187, 253);
+}

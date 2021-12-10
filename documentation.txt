@@ -1,11 +1,30 @@
 TODO:
-    -Make website GUI for testing.
-    -Find out what the proper way to do inheritance without classes is. Can I do with module pattern?
-    -Can I use the same clock/read/write functions for every module?
+    -Make website GUI for testing
+        >add bus input
+    
+    -Inheritance / code structure
+        >Find out what the proper way to do inheritance without classes is. Can I do with module pattern?
+        >Can I use the same clock/read/write functions for every module?
+        >onLED add/remove make in main module class
+
+UNIT TEST
+    -make unit tests before starting ALU
+    -ALU must be tested properly
 
 GENERAL:
     -Make sure order of load/enable does not cause any problems.
     -Make sure same size array is always passed between modules.
+
+HTML/CSS
+    -initially only 8 bit, change to scale
+
+DOM:
+    -function in charge of interacting with DOM/GUI
+    -initially for only 8 bit, if this is changed dynamically will need to be done again
+    -SHOW BUS AS LINE
+
+INPUT
+    -used for external input into virtual computer (i.e. some kind of input device)
 
 CLOCK:
     -HIGH and LOW clock cycles
@@ -14,6 +33,7 @@ CLOCK:
 BUS:
     -Simple array holding and transfering data. Modules can read and write from bus on each clock tick.
     -Bus imput must be bitsize of computer.
+    -read() for comuter functions, getData() for DOM interaction
 
-REGISTER A B INSTRUCTION
-    ttern?
+REGISTER A, B, INSTRUCTION
+    -
