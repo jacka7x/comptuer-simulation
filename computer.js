@@ -6,28 +6,44 @@ const BIT_SIZE = 8;
 
 const DOM = ( () => {
     const clockOutput = Array.from(Array.from(document.getElementById("CLOCK").getElementsByClassName("module-output"))[0].getElementsByClassName("bit-LED"));
-
     const busOutput = Array.from(Array.from(document.getElementById("BUS").getElementsByClassName("module-output"))[0].getElementsByClassName("bit-LED"));
+    const reg_AOutput = Array.from(Array.from(document.getElementById("REG_A").getElementsByClassName("module-output"))[0].getElementsByClassName("bit-LED"));
+    const reg_BOutput = Array.from(Array.from(document.getElementById("REG_B").getElementsByClassName("module-output"))[0].getElementsByClassName("bit-LED"));
 
     function output() {
-        // DOM.output called three times per clock cycle, from the clock
+        // DOM.output called three times per clock cycle, from the clock module
 
-        clockDisplay();
-        busDisplay();
+        _clockDisplay();
+        _busDisplay();
+        _regDisplay(REGISTER_A, reg_AOutput);
+        _regDisplay(REGISTER_B, reg_BOutput);
     }
 
-    function clockDisplay() {
+    function _clockDisplay() {
         CLOCK.getState() ?
-            clockOutput[0].classList.add("onLED") :
-            clockOutput[0].classList.remove("onLED");
+            _on(clockOutput[0]) : _off(clockOutput[0]);
     }
 
-    function busDisplay() {
+    function _busDisplay() {
         BUS.getData().forEach( (data, LED) => {
             data ?
-                busOutput[LED].classList.add("onLED") :
-                busOutput[LED].classList.remove("onLED");
+            _on(busOutput[LED]) : _off(busOutput[LED]);
         });
+    }
+
+    function _regDisplay(reg_name, LEDArray) {
+        reg_name.getData().forEach( (data, LED) => {
+            data ?
+                _on(LEDArray[LED]) : _off(LEDArray[LED]);
+        });
+    }
+
+    function _on(LED) {
+        LED.classList.add("onLED");
+    }
+
+    function _off(LED) {
+        LED.classList.remove("onLED")
     }
 
     return{
@@ -50,9 +66,16 @@ const INPUT = ( () => {
     }
 })();
 
+function Module() {};
+
+Module.prototype.getData = function() {
+    return this.data;
+}
+
 const CLOCK = ( () => {
     let state = LOW;
-    const clockSpeedDefault = 500;
+    const clockSpeedDefault = 200;
+    let clockSpeed = null;
 
     function startClock(interval = clockSpeedDefault) {
         setInterval( () => {
@@ -61,6 +84,7 @@ const CLOCK = ( () => {
             state ? pulseLOW() : pulseHIGH();
         }, interval)
 
+        clockSpeed = interval;
         console.log(`CLOCK STARTING AT ${interval} MS`);
     }
 
@@ -95,9 +119,14 @@ const CLOCK = ( () => {
         return state;
     }
 
+    function getClockSpeed() {
+        return clockSpeed;
+    }
+
     return {
         startClock,
-        getState
+        getState,
+        getClockSpeed
     }
 })();
 
@@ -117,7 +146,7 @@ const BUS = ( () => {
     }
 
     function getData() {
-        return data
+        return data;
     }
 
     return {
@@ -127,69 +156,31 @@ const BUS = ( () => {
     }
 })();
 
-const REGISTER_A = ( () => {
-    let data = Array.from({length: BIT_SIZE}, () => LOW);
-    let load = LOW;
-    let enable = LOW;
+function Register() {
+    this.data = Array.from({length: BIT_SIZE}, () => LOW);
+    this.load = LOW;
+    this.enable = LOW;
+};
 
-    function read() {
-        data = BUS.read();
+Register.prototype = Object.create(Module.prototype);
+
+Register.prototype.read = function() {
+    this.data = BUS.read();
+};
+
+Register.prototype.write = function() {
+    BUS.write(this.data)
+}
+
+// MOVE TO MODULE?
+Register.prototype.clockPulse = function() {
+    if (this.load && this.enable) {
+        console.error(`Both load and enable are HIGH`);
+    } else {
+        if (this.load && enableOrLoad === "load") { read(); }
+        if (this.enable && enableOrLoad === "enable") { write(); }
     }
-
-    function write() {
-        BUS.write(data)
-    }
-
-    function clockPulse(enableOrLoad){
-        if (load && enable) {
-            console.error(`Both load and enable are HIGH in register A.`);
-        } else {
-            if (load && enableOrLoad === "load") { read(); }
-            if (enable && enableOrLoad === "enable") { write(); }
-        }
-    }
-
-    function getData(){
-        return data;
-    }
-
-    return {
-        clockPulse,
-        getData
-    }
-})();
-
-const REGISTER_B = ( () => {
-    let data = Array.from({length: BIT_SIZE}, () => LOW);
-    let load = LOW;
-    let enable = LOW;
-
-    function read() {
-        data = BUS.read();
-    }
-
-    function write() {
-        BUS.write(data)
-    }
-
-    function clockPulse(enableOrLoad){
-        if (load && enable) {
-            console.error(`Both load and enable are HIGH in register B.`);
-        } else {
-            if (load && enableOrLoad === "load") { read(); }
-            if (enable && enableOrLoad === "enable") { write(); }
-        }
-    }
-
-    function getData(){
-        return data;
-    }
-
-    return {
-        clockPulse,
-        getData
-    }
-})();
+}
 
 // ------------------------------- ||
 
@@ -197,11 +188,22 @@ function rand() {
     return Math.random() < 0.5
 }
 
-CLOCK.startClock();
+CLOCK.startClock(500);
+
+const REGISTER_A = new Register();
+const REGISTER_B = new Register();
 
 setInterval( () => {
     INPUT.toBus(
         [rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand()])
-}, 1200)
+}, CLOCK.getClockSpeed() * 2)
+
+setInterval( () => {
+    REGISTER_A.read();
+}, CLOCK.getClockSpeed() *  4)
+
+setInterval( () => {
+    REGISTER_B.read();
+}, CLOCK.getClockSpeed() * 6 )
 
 

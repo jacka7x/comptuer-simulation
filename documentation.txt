@@ -36,4 +36,4 @@ BUS:
     -read() for comuter functions, getData() for DOM interaction
 
 REGISTER A, B, INSTRUCTION
-    -
+    -Inherits from Register which inherits from Module
