@@ -13,25 +13,25 @@ const DOM = ( () => {
     function output() {
         // DOM.output called three times per clock cycle, from the clock module
 
-        _clockDisplay();
-        _busDisplay();
-        _regDisplay(REGISTER_A, reg_AOutput);
-        _regDisplay(REGISTER_B, reg_BOutput);
+        _clockDisplay(clockOutput);
+        _busDisplay(busOutput);
+        _regDisplay(reg_AOutput, REGISTER_A);
+        _regDisplay(reg_BOutput, REGISTER_B);
     }
 
-    function _clockDisplay() {
+    function _clockDisplay(LEDArray) {
         CLOCK.getState() ?
-            _on(clockOutput[0]) : _off(clockOutput[0]);
+            _on(LEDArray[0]) : _off(LEDArray[0]);
     }
 
-    function _busDisplay() {
+    function _busDisplay(LEDArray) {
         BUS.getData().forEach( (data, LED) => {
             data ?
-            _on(busOutput[LED]) : _off(busOutput[LED]);
+            _on(LEDArray[LED]) : _off(LEDArray[LED]);
         });
     }
 
-    function _regDisplay(reg_name, LEDArray) {
+    function _regDisplay(LEDArray, reg_name) {
         reg_name.getData().forEach( (data, LED) => {
             data ?
                 _on(LEDArray[LED]) : _off(LEDArray[LED]);
